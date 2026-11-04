@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useFilterStore } from '@/shared/modal/filterStore'
+
 import { FilterModal } from './FilterModal'
 
 export const App = () => {
 	const { t } = useTranslation('filter')
 	const [isFilterOpen, setIsFilterOpen] = useState(false)
+	const filters = useFilterStore(state => state.filters)
 
 	return (
 		<section className="w-full h-dvh flex items-center justify-center">
@@ -14,6 +17,7 @@ export const App = () => {
 				WinWinTravel frontend test task
 			</h1>
 			<button onClick={() => setIsFilterOpen(true)}>{t('button')}</button>
+			<pre>{JSON.stringify(filters, null, 2)}</pre>
 			{isFilterOpen && <FilterModal onClose={() => setIsFilterOpen(false)} />}
 		</section>
 	)
