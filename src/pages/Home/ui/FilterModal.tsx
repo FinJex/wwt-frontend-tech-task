@@ -11,30 +11,67 @@ export const FilterModal = ({ onClose }: FilterModalProps) => {
 	const { data: filterItems, isPending, isError } = useFilterItems()
 
 	return (
-		<div className="fixed inset-0 z-10 flex items-center justify-center bg-black/50">
+		<div className="fixed inset-0 z-10 overflow-y-auto bg-black/50 px-4 py-10">
 			<div
 				role="dialog"
 				aria-modal="true"
 				aria-labelledby="filter-title"
-				className="w-full max-w-xl rounded-lg bg-white p-6"
+				className="mx-auto w-full max-w-[1280px] rounded-2xl bg-white px-8 pb-8 font-[Inter] text-[#31393c]"
 			>
-				<header className="flex items-center justify-between">
+				<header className="relative border-b border-gray-300 py-6 text-center">
 					<h2
 						id="filter-title"
-						className="text-xl font-medium"
+						className="text-[40px] font-medium"
 					>
 						{t('title')}
 					</h2>
 					<button
 						type="button"
 						onClick={onClose}
+						aria-label={t('close')}
+						className="absolute top-1/2 right-0 -translate-y-1/2"
 					>
-						{t('close')}
+						<svg
+							width="24"
+							height="24"
+							viewBox="0 0 24 24"
+							aria-hidden="true"
+						>
+							<path
+								d="M5 5l14 14M19 5L5 19"
+								stroke="currentColor"
+								strokeWidth="2"
+							/>
+						</svg>
 					</button>
 				</header>
-				{isPending && <p>{t('loading')}</p>}
-				{isError && <p>{t('error')}</p>}
-				<ul>{filterItems?.map(item => <li key={item.id}>{item.name}</li>)}</ul>
+				{isPending && <p className="py-8">{t('loading')}</p>}
+				{isError && <p className="py-8">{t('error')}</p>}
+				{filterItems?.map(item => (
+					<fieldset
+						key={item.id}
+						className="border-b border-gray-300 pt-8 pb-[46px]"
+					>
+						<legend className="float-left w-full text-2xl font-medium">
+							{item.name}
+						</legend>
+						<div className="clear-both grid grid-cols-3 gap-x-8 gap-y-4 pt-6">
+							{item.options.map(option => (
+								<label
+									key={option.id}
+									className="flex items-center gap-4"
+									title={option.description}
+								>
+									<input
+										type="checkbox"
+										className="size-5 accent-[#ff5f00]"
+									/>
+									{option.name}
+								</label>
+							))}
+						</div>
+					</fieldset>
+				))}
 			</div>
 		</div>
 	)
