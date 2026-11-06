@@ -1,6 +1,10 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { FilterType } from '@/shared/api/types/Filter'
+import { SearchRequestFilter } from '@/shared/api/types/SearchRequest/SearchRequestFilter'
 import { useFilterItems } from '@/shared/api/useFilterItems'
+import { useFilterStore } from '@/shared/modal/filterStore'
 
 interface FilterModalProps {
 	onClose: () => void
@@ -9,6 +13,37 @@ interface FilterModalProps {
 export const FilterModal = ({ onClose }: FilterModalProps) => {
 	const { t } = useTranslation('filter')
 	const { data: filterItems, isPending, isError } = useFilterItems()
+	const savedFilters = useFilterStore(state => state.filters)
+	const [draft, setDraft] = useState<SearchRequestFilter>(savedFilters)
+
+	const isChecked = (groupId: string, optionId: string) =>
+		draft.find(group => group.id === groupId)?.optionsIds.includes(optionId) ??
+		false
+
+	const toggleOption = (groupId: string, optionId: string) => {
+		setDraft(prev => {
+			const group = prev.find(group => group.id === groupId)
+
+			if (!group) {
+				return [
+					...prev,
+					{ id: groupId, type: FilterType.OPTION, optionsIds: [optionId] }
+				]
+			}
+
+			const optionsIds = group.optionsIds.includes(optionId)
+				? group.optionsIds.filter(id => id !== optionId)
+				: [...group.optionsIds, optionId]
+
+			if (optionsIds.length === 0) {
+				return prev.filter(group => group.id !== groupId)
+			}
+
+			return prev.map(group =>
+				group.id === groupId ? { ...group, optionsIds } : group
+			)
+		})
+	}
 
 	return (
 		<div className="fixed inset-0 z-10 overflow-y-auto bg-black/50 px-4 py-10">
@@ -59,12 +94,14 @@ export const FilterModal = ({ onClose }: FilterModalProps) => {
 							{item.options.map(option => (
 								<label
 									key={option.id}
-									className="flex items-center gap-4"
+									className="flex cursor-pointer items-center gap-4"
 									title={option.description}
 								>
 									<input
 										type="checkbox"
-										className="size-5 accent-[#ff5f00]"
+										checked={isChecked(item.id, option.id)}
+										onChange={() => toggleOption(item.id, option.id)}
+										className="size-5 cursor-pointer accent-[#ff5f00]"
 									/>
 									{option.name}
 								</label>
