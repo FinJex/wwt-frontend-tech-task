@@ -5,6 +5,10 @@ import { FilterType } from '@/shared/api/types/Filter'
 import { SearchRequestFilter } from '@/shared/api/types/SearchRequest/SearchRequestFilter'
 import { useFilterItems } from '@/shared/api/useFilterItems'
 import { useFilterStore } from '@/shared/modal/filterStore'
+import { Button } from '@/shared/ui/Button'
+import { CloseIcon } from '@/shared/ui/CloseIcon'
+
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface FilterModalProps {
 	onClose: () => void
@@ -15,6 +19,13 @@ export const FilterModal = ({ onClose }: FilterModalProps) => {
 	const { data: filterItems, isPending, isError } = useFilterItems()
 	const savedFilters = useFilterStore(state => state.filters)
 	const [draft, setDraft] = useState<SearchRequestFilter>(savedFilters)
+	const setFilters = useFilterStore(state => state.setFilters)
+	const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+
+	const applyNewFilter = () => {
+		setFilters(draft)
+		onClose()
+	}
 
 	const isChecked = (groupId: string, optionId: string) =>
 		draft.find(group => group.id === groupId)?.optionsIds.includes(optionId) ??
@@ -66,18 +77,7 @@ export const FilterModal = ({ onClose }: FilterModalProps) => {
 						aria-label={t('close')}
 						className="absolute top-1/2 right-0 -translate-y-1/2"
 					>
-						<svg
-							width="24"
-							height="24"
-							viewBox="0 0 24 24"
-							aria-hidden="true"
-						>
-							<path
-								d="M5 5l14 14M19 5L5 19"
-								stroke="currentColor"
-								strokeWidth="2"
-							/>
-						</svg>
+						<CloseIcon />
 					</button>
 				</header>
 				{isPending && <p className="py-8">{t('loading')}</p>}
@@ -109,7 +109,24 @@ export const FilterModal = ({ onClose }: FilterModalProps) => {
 						</div>
 					</fieldset>
 				))}
+				<footer className="relative flex items-center justify-center pt-8">
+					<Button onClick={() => setIsConfirmOpen(true)}>{t('apply')}</Button>
+					<button
+						type="button"
+						onClick={() => setDraft([])}
+						className="absolute right-0 text-sm text-[#0a7d8c] underline"
+					>
+						{t('clearAll')}
+					</button>
+				</footer>
 			</div>
+			{isConfirmOpen && (
+				<ConfirmDialog
+					onApplyNew={applyNewFilter}
+					onUseOld={onClose}
+					onClose={() => setIsConfirmOpen(false)}
+				/>
+			)}
 		</div>
 	)
 }
