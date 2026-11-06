@@ -1,11 +1,14 @@
 import { useTranslation } from 'react-i18next'
 
+import { useFilterItems } from '@/shared/api/useFilterItems'
+
 interface FilterModalProps {
 	onClose: () => void
 }
 
 export const FilterModal = ({ onClose }: FilterModalProps) => {
 	const { t } = useTranslation('filter')
+	const { data: filterItems, isPending, isError } = useFilterItems()
 
 	return (
 		<div className="fixed inset-0 z-10 flex items-center justify-center bg-black/50">
@@ -29,6 +32,9 @@ export const FilterModal = ({ onClose }: FilterModalProps) => {
 						{t('close')}
 					</button>
 				</header>
+				{isPending && <p>{t('loading')}</p>}
+				{isError && <p>{t('error')}</p>}
+				<ul>{filterItems?.map(item => <li key={item.id}>{item.name}</li>)}</ul>
 			</div>
 		</div>
 	)

@@ -1,5 +1,7 @@
 {
 	"button": "Filter",
 	"title": "Filter",
-	"close": "Close"
+	"close": "Close",
+	"loading": "Loading...",
+	"error": "Failed to load filters"
 }
